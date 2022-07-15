@@ -57,6 +57,7 @@ resource "spacelift_policy_attachment" "trigger-dependent-stacks-terraform" {
 resource "spacelift_stack_destructor" "terraform-stack" {
   depends_on = [
     spacelift_environment_variable.ansible_context_id,
+    spacelift_environment_variable.aws_region,
     spacelift_aws_role.terraform-stack,
     spacelift_policy_attachment.ignore-outside-project-root-terraform,
     spacelift_policy_attachment.trigger-dependent-stacks-terraform,

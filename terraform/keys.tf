@@ -19,7 +19,7 @@ resource "spacelift_mounted_file" "ansible-key" {
   context_id    = spacelift_context.ansible-context.id
   relative_path = "tf-ansible-key.pem"
   content       = base64encode(nonsensitive(tls_private_key.rsa-ansible.private_key_pem))
-  write_only    = false
+  write_only    = true
 }
 
 resource "spacelift_environment_variable" "ansible_private_key_file" {
