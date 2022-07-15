@@ -23,7 +23,7 @@
           ansible.builtin.file:
                 state: directory
                 dest: "{{ doc_root }}"
-                mode: 0644
+                mode: 0701
 
         - name: "Configuration File"
           become: true

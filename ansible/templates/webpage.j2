@@ -1,3 +1,8 @@
 <h1>Terraform + Ansible Spacelift workflow</h1>
 
 This server is running on  {{ ansible_facts['default_ipv4']['address'] }}:{{ port_number }}.
+
+Created by
+<a href="https://{{ lookup('env', 'TF_VAR_spacelift_account_name') }}.app.spacelift.io/stack/{{ lookup('env', 'TF_VAR_spacelift_stack_id') }}/run/{{ lookup('env', 'TF_VAR_spacelift_run_id') }}">https://{{ lookup('env', 'TF_VAR_spacelift_account_name') }}.app.spacelift.io/stack/{{ lookup('env', 'TF_VAR_spacelift_stack_id') }}/run/{{ lookup('env', 'TF_VAR_spacelift_run_id') }}</a>
+
+<img alt="Hello from Ansible" src="https://cataas.com/cat/says/Hello%20from%20Spacelift" /> 
