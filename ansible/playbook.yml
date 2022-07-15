@@ -1,0 +1,55 @@
+- name: will wait till reachable
+  hosts: all
+  gather_facts: false # important
+  ignore_unreachable: true
+  vars_files:
+        - vars/default.yml
+  tasks:
+        - name: Wait for system to become reachable
+          ansible.builtin.wait_for_connection:
+                timeout: 180
+
+        - name: Gather facts for the first time
+          ansible.builtin.setup:
+
+        - name: Install apache packages
+          become: true
+          ansible.builtin.yum:
+                name: httpd
+                state: present
+
+        - name: "Creating Document root"
+          become: true
+          ansible.builtin.file:
+                state: directory
+                dest: "{{ doc_root }}"
+                mode: 0644
+
+        - name: "Configuration File"
+          become: true
+          ansible.builtin.template:
+                src: "webserver.j2"
+                dest: "/etc/httpd/conf.d/new_conf.conf"
+                mode: 0644
+          notify: "server restart"
+
+        - name: "Copy webpages"
+          become: true
+          ansible.builtin.template:
+                src: "webpage.j2"
+                dest: "{{ doc_root }}/index.html"
+
+        - name: ensure httpd is running
+          become: true
+          ansible.builtin.service:
+                name: httpd
+                state: started
+          ignore_errors: "{{ ansible_check_mode }}"
+
+  handlers:
+        - name: "server restart"
+          become: true
+          ansible.builtin.service:
+                name: "httpd"
+                state: restarted
+          ignore_errors: "{{ ansible_check_mode }}"

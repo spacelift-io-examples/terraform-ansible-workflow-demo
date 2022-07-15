@@ -1,0 +1,2 @@
+doc_root: /var/www/new_doc_root
+port_number: 8000
