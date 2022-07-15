@@ -1,8 +1,8 @@
 ---
 plugin: aws_ec2
 regions:
-  - eu-central-1
+  - "${aws_region}"
 filters:
   tag-key: "Ansible"
   instance-state-name: "running"
-  tag:SpaceliftStackID: ${spacelift_stack_id}
+  tag:SpaceliftStackID: "${spacelift_stack_id}"
