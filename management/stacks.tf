@@ -8,10 +8,17 @@ resource "spacelift_stack" "terraform-ansible-workflow-terraform" {
   branch         = "main"
   name           = "Terraform Ansible Workflow - Terraform - ${random_string.stack_name_suffix.result}"
   project_root   = "terraform"
-  repository     = "tf-ansible-workflow-test"
+  repository     = var.github_repository_name
   labels         = toset(var.spacelift_labels)
   administrative = true
   autodeploy     = true
+
+  dynamic "github_enterprise" {
+    for_each = var.github_org_name != "" ? [1] : []
+    content {
+      namespace   = var.github_org_name
+    }
+  }
 
   terraform_version = "1.2.4"
 }
@@ -67,9 +74,16 @@ resource "spacelift_stack" "terraform-ansible-workflow-ansible" {
   branch       = "main"
   name         = "Terraform Ansible Workflow - Ansible - ${random_string.stack_name_suffix.result}"
   project_root = "ansible"
-  repository   = "tf-ansible-workflow-test"
+  repository   = var.github_repository_name
   labels       = toset(concat(var.spacelift_labels, ["depends-on:${spacelift_stack.terraform-ansible-workflow-terraform.id}"]))
   autodeploy   = true
+
+  dynamic "github_enterprise" {
+    for_each = var.github_org_name != "" ? [1] : []
+    content {
+      namespace   = var.github_org_name
+    }
+  }
 
   runner_image = "public.ecr.aws/spacelift/runner-ansible:latest"
 
