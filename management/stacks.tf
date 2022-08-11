@@ -86,19 +86,14 @@ resource "spacelift_stack" "terraform-ansible-workflow-ansible" {
     }
   }
 
-  runner_image = "public.ecr.aws/spacelift/runner-ansible:latest"
+  runner_image = "public.ecr.aws/spacelift/runner-ansible-aws:latest"
+}
 
-  after_init = [
-    "pip3 install --target=/mnt/workspace/pip boto3 botocore",
-    "export PYTHONPATH=/mnt/workspace/pip",
-    "chmod 600 /mnt/workspace/tf-ansible-key.pem",
-    "mv /mnt/workspace/source/ansible/ansible.cfg /mnt/workspace/ansible.cfg",
-    "export ANSIBLE_CONFIG=/mnt/workspace/ansible.cfg",
-  ]
-
-  before_apply = [
-    "chmod 600 /mnt/workspace/tf-ansible-key.pem",
-  ]
+resource "spacelift_environment_variable" "ansible_config_env_var" {
+  stack_id   = spacelift_stack.terraform-ansible-workflow-ansible.id
+  name       = "ANSIBLE_CONFIG"
+  value      = "/mnt/workspace/source/ansible/ansible.cfg"
+  write_only = false
 }
 
 # Ansible stack attachments
