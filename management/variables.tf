@@ -16,8 +16,3 @@ variable "github_org_name" {
   type    = string
   default = ""
 }
-
-variable "github_repository_name" {
-  type    = string
-  default = "terraform-ansible-workflow-demo"
-}
