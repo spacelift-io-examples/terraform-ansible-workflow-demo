@@ -1,6 +1,6 @@
 - name: will wait till reachable
   hosts: all
-  gather_facts: false # important
+  gather_facts: false # we just created the EC2 machine, so we want for the machine to become accessible before gathering facts
   ignore_unreachable: true
   vars_files:
         - vars/default.yml

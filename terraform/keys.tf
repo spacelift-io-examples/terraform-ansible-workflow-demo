@@ -20,6 +20,7 @@ resource "spacelift_mounted_file" "ansible-key" {
   relative_path = "tf-ansible-key.pem"
   content       = base64encode(nonsensitive(tls_private_key.rsa-ansible.private_key_pem))
   write_only    = true
+  file_mode     = "600"
 }
 
 resource "spacelift_environment_variable" "ansible_private_key_file" {

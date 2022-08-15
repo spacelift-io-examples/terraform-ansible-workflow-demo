@@ -5,10 +5,10 @@ resource "random_string" "stack_name_suffix" {
 
 # Terraform stack
 resource "spacelift_stack" "terraform-ansible-workflow-terraform" {
-  branch         = "main"
+  branch         = data.spacelift_stack.current_stack.branch
   name           = "Terraform Ansible Workflow - Terraform - ${random_string.stack_name_suffix.result}"
   project_root   = "terraform"
-  repository     = var.github_repository_name
+  repository     = data.spacelift_stack.current_stack.repository
   labels         = toset(var.spacelift_labels)
   administrative = true
   autodeploy     = true
@@ -72,10 +72,10 @@ resource "spacelift_stack" "terraform-ansible-workflow-ansible" {
     playbook = "playbook.yml"
   }
 
-  branch       = "main"
+  branch       = data.spacelift_stack.current_stack.branch
   name         = "Terraform Ansible Workflow - Ansible - ${random_string.stack_name_suffix.result}"
   project_root = "ansible"
-  repository   = var.github_repository_name
+  repository   = data.spacelift_stack.current_stack.repository
   labels       = toset(concat(var.spacelift_labels, ["depends-on:${spacelift_stack.terraform-ansible-workflow-terraform.id}"]))
   autodeploy   = true
 
@@ -86,19 +86,14 @@ resource "spacelift_stack" "terraform-ansible-workflow-ansible" {
     }
   }
 
-  runner_image = "public.ecr.aws/spacelift/runner-ansible:latest"
+  runner_image = "public.ecr.aws/spacelift/runner-ansible-aws:latest"
+}
 
-  after_init = [
-    "pip3 install --target=/mnt/workspace/pip boto3 botocore",
-    "export PYTHONPATH=/mnt/workspace/pip",
-    "chmod 600 /mnt/workspace/tf-ansible-key.pem",
-    "mv /mnt/workspace/source/ansible/ansible.cfg /mnt/workspace/ansible.cfg",
-    "export ANSIBLE_CONFIG=/mnt/workspace/ansible.cfg",
-  ]
-
-  before_apply = [
-    "chmod 600 /mnt/workspace/tf-ansible-key.pem",
-  ]
+resource "spacelift_environment_variable" "ansible_config_env_var" {
+  stack_id   = spacelift_stack.terraform-ansible-workflow-ansible.id
+  name       = "ANSIBLE_CONFIG"
+  value      = "/mnt/workspace/source/ansible/ansible.cfg"
+  write_only = false
 }
 
 # Ansible stack attachments
@@ -119,6 +114,10 @@ resource "spacelift_policy_attachment" "warn-on-unreachable-hosts-ansible" {
 
 # Ignore outside of project root for current stack
 data "spacelift_current_stack" "this" {}
+
+data "spacelift_stack" "current_stack" {
+  stack_id = data.spacelift_current_stack.this.id
+}
 
 resource "spacelift_policy_attachment" "ignore-outside-project-root-this" {
   policy_id = spacelift_policy.ignore-outside-project-root.id
