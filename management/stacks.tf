@@ -50,17 +50,11 @@ resource "spacelift_aws_role" "terraform-stack" {
   role_arn = var.aws_role
 }
 
-resource "spacelift_policy_attachment" "trigger-dependent-stacks-terraform" {
-  policy_id = spacelift_policy.trigger-dependent-stacks.id
-  stack_id  = spacelift_stack.terraform-ansible-workflow-terraform.id
-}
-
 resource "spacelift_stack_destructor" "terraform-stack" {
   depends_on = [
     spacelift_environment_variable.ansible_context_id,
     spacelift_environment_variable.aws_region,
     spacelift_aws_role.terraform-stack,
-    spacelift_policy_attachment.trigger-dependent-stacks-terraform,
   ]
 
   stack_id = spacelift_stack.terraform-ansible-workflow-terraform.id
@@ -105,6 +99,12 @@ resource "spacelift_aws_role" "ansible-stack" {
 resource "spacelift_policy_attachment" "warn-on-unreachable-hosts-ansible" {
   policy_id = spacelift_policy.warn-on-unreachable-hosts.id
   stack_id  = spacelift_stack.terraform-ansible-workflow-ansible.id
+}
+
+# The Ansible stack depends on the Terraform one
+resource "spacelift_stack_dependency" "terraform-ansible" {
+  stack_id            = spacelift_stack.terraform-ansible-workflow-ansible.id
+  depends_on_stack_id = spacelift_stack.terraform-ansible-workflow-terraform.id
 }
 
 # Trigger a run in terraform stack
