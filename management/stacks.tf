@@ -26,7 +26,8 @@ resource "spacelift_stack" "terraform-ansible-workflow-terraform" {
     }
   }
 
-  terraform_version = "1.2.4"
+  terraform_version            = "1.2.4"
+  terraform_smart_sanitization = true
 }
 
 # Terraform context variable
