@@ -3,6 +3,12 @@ resource "random_string" "stack_name_suffix" {
   special = false
 }
 
+data "spacelift_current_stack" "this" {}
+
+data "spacelift_stack" "current_stack" {
+  stack_id = data.spacelift_current_stack.this.id
+}
+
 # Terraform stack
 resource "spacelift_stack" "terraform-ansible-workflow-terraform" {
   branch         = data.spacelift_stack.current_stack.branch
@@ -44,11 +50,6 @@ resource "spacelift_aws_role" "terraform-stack" {
   role_arn = var.aws_role
 }
 
-resource "spacelift_policy_attachment" "ignore-outside-project-root-terraform" {
-  policy_id = spacelift_policy.ignore-outside-project-root.id
-  stack_id  = spacelift_stack.terraform-ansible-workflow-terraform.id
-}
-
 resource "spacelift_policy_attachment" "trigger-dependent-stacks-terraform" {
   policy_id = spacelift_policy.trigger-dependent-stacks.id
   stack_id  = spacelift_stack.terraform-ansible-workflow-terraform.id
@@ -59,7 +60,6 @@ resource "spacelift_stack_destructor" "terraform-stack" {
     spacelift_environment_variable.ansible_context_id,
     spacelift_environment_variable.aws_region,
     spacelift_aws_role.terraform-stack,
-    spacelift_policy_attachment.ignore-outside-project-root-terraform,
     spacelift_policy_attachment.trigger-dependent-stacks-terraform,
   ]
 
@@ -102,26 +102,9 @@ resource "spacelift_aws_role" "ansible-stack" {
   role_arn = var.aws_role
 }
 
-resource "spacelift_policy_attachment" "ignore-outside-project-root-ansible" {
-  policy_id = spacelift_policy.ignore-outside-project-root.id
-  stack_id  = spacelift_stack.terraform-ansible-workflow-ansible.id
-}
-
 resource "spacelift_policy_attachment" "warn-on-unreachable-hosts-ansible" {
   policy_id = spacelift_policy.warn-on-unreachable-hosts.id
   stack_id  = spacelift_stack.terraform-ansible-workflow-ansible.id
-}
-
-# Ignore outside of project root for current stack
-data "spacelift_current_stack" "this" {}
-
-data "spacelift_stack" "current_stack" {
-  stack_id = data.spacelift_current_stack.this.id
-}
-
-resource "spacelift_policy_attachment" "ignore-outside-project-root-this" {
-  policy_id = spacelift_policy.ignore-outside-project-root.id
-  stack_id  = data.spacelift_current_stack.this.id
 }
 
 # Trigger a run in terraform stack
@@ -132,6 +115,5 @@ resource "spacelift_run" "this" {
   depends_on = [
     spacelift_environment_variable.ansible_context_id,
     spacelift_aws_role.ansible-stack,
-    spacelift_policy_attachment.ignore-outside-project-root-ansible,
   ]
 }

@@ -1,11 +1,3 @@
-resource "spacelift_policy" "ignore-outside-project-root" {
-  name = "Ignore pushes outside of project root - ${random_string.stack_name_suffix.result}"
-  body = file("${path.module}/policies/ignore-outside-project-root.rego")
-  type = "GIT_PUSH"
-
-  labels = toset(var.spacelift_labels)
-}
-
 resource "spacelift_policy" "trigger-dependent-stacks" {
   name = "Trigger dependent stacks - ${random_string.stack_name_suffix.result}"
   body = file("${path.module}/policies/trigger-dependent-stacks.rego")
