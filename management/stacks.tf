@@ -18,7 +18,6 @@ resource "spacelift_stack" "terraform-ansible-workflow-terraform" {
   labels         = toset(var.spacelift_labels)
   administrative = true
   autodeploy     = true
-  terraform_smart_sanitization = true
 
   dynamic "github_enterprise" {
     for_each = var.github_org_name != "" ? [1] : []
