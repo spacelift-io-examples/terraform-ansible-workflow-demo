@@ -78,6 +78,7 @@ resource "spacelift_stack" "terraform-ansible-workflow-ansible" {
   repository   = data.spacelift_stack.current_stack.repository
   labels       = toset(concat(var.spacelift_labels, ["depends-on:${spacelift_stack.terraform-ansible-workflow-terraform.id}"]))
   autodeploy   = true
+  before_init = ["chmod 600 /mnt/workspace/tf-ansible-key.pem"]
 
   dynamic "github_enterprise" {
     for_each = var.github_org_name != "" ? [1] : []
