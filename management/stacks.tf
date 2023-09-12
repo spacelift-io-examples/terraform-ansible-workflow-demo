@@ -12,6 +12,7 @@ resource "spacelift_stack" "terraform-ansible-workflow-terraform" {
   labels         = toset(var.spacelift_labels)
   administrative = true
   autodeploy     = true
+  terraform_smart_sanitization = true
 
   dynamic "github_enterprise" {
     for_each = var.github_org_name != "" ? [1] : []
@@ -79,6 +80,7 @@ resource "spacelift_stack" "terraform-ansible-workflow-ansible" {
   labels       = toset(concat(var.spacelift_labels, ["depends-on:${spacelift_stack.terraform-ansible-workflow-terraform.id}"]))
   autodeploy   = true
   before_init = ["chmod 600 /mnt/workspace/tf-ansible-key.pem"]
+  before_apply = ["chmod 600 /mnt/workspace/tf-ansible-key.pem"]
 
   dynamic "github_enterprise" {
     for_each = var.github_org_name != "" ? [1] : []
